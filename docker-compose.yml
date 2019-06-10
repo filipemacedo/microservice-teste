@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  # POSTGRES DB
+  postgres:
+    container_name: postgres
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    networks: 
+      - postgres_db
+
+    environment:
+      POSTGRES_PASSWORD: root
+  
+  # USER SERVICE
+  user:
+    container_name: user
+    build: ./user
+    depends_on:
+      - postgres
+    networks:
+      - microservice
+      - postgres_db
+
+  # GATEWAY ENDPOINT
+  gateway:
+    container_name: gateway
+    build: ./gateway
+    ports:
+      - "80:3000"
+    depends_on: 
+      - user
+    networks:
+      - microservice
+      - app
+          
+networks:
+
+  app: 
+  microservice:
+  postgres_db:
